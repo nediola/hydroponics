@@ -36,6 +36,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mainpageapp',
+    'baseapp',
+    'robotapp',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -56,7 +58,9 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR + '/templates',
-            BASE_DIR + '/mainpageapp/templates'
+            BASE_DIR + '/mainpageapp/templates',
+            BASE_DIR + '/baseapp/templates',
+            BASE_DIR + '/robotapp/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {

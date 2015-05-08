@@ -8,4 +8,6 @@ urlpatterns = [
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('mainpageapp.urls')),
+    url(r'^base/', include('baseapp.urls')),
+    url(r'^robot/', include('robotapp.urls')),
 ]
