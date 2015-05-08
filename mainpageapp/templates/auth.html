@@ -1,8 +1,8 @@
 {% extends 'main.html' %}
 
-{% block auth %}
+{% block mainpage %}
 <div class="container mycontainer">
-    <form class="form-signin" action="auth/login/" method="post">{% csrf_token %}
+    <form class="form-signin" action="/login/" method="post">{% csrf_token %}
       <h2 class="form-signin-heading">Please sign in</h2>
       <label for="username" class="sr-only">Login</label>
       <input type="login" id="username" name="username" class="form-control" placeholder="Login" required autofocus>
@@ -16,4 +16,4 @@
       <input class="button" type="submit" value="Sign in">
     </form>      
   </div> <!-- /container -->
-{% endblock %} 
+{% endblock mainpage%} 

@@ -5,15 +5,18 @@ from django.template.loader import get_template
 from django.template import Context
 from django.shortcuts import render_to_response, redirect
 from mainpageapp.models import Plant, Mix, GardenBed
-from django.contrib import auth
 from django.http import HttpResponseRedirect
 from django.core.context_processors import csrf
+from django.contrib import auth
 
-# Create your views here.
+def enter(request):
+	if request.user.is_authenticated():
+		return redirect('/home')
+	else:
+		return redirect('/auth')
 
 def authenticate(request):
-	view = 'auth'
-	return render_to_response('auth.html', {'name':view, 'username':auth.get_user(request).username})
+	return render_to_response('auth.html')
 
 def login(request):
 	args = {}
@@ -24,16 +27,20 @@ def login(request):
 		user = auth.authenticate(username=username, password=password)
 		if user is not None:
 			auth.login(request, user)
-			return redirect('/')
+			return redirect('/home')
 		else:
 			args['login_error'] = "User not found"
     		return render_to_response('auth.html', args)
 	else:
-		return render_to_response('main.html', args)
-	
-	return
+		args['login_error'] = "Not POST request"
+    	return render_to_response('auth.html', args)
 
 def logout(request):
 	auth.logout(request)
-	args = {}
 	return redirect('/')
+
+def home(request):
+	return render_to_response('home.html')
+	
+
+    

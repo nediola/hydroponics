@@ -1,4 +1,3 @@
-
 {% load staticfiles %}
 <!DOCTYPE html>
 <html class="full">
@@ -20,11 +19,8 @@
 </head>
 
 <body>
-{% if username %}
-	<li><a href="auth/logout/">Logout ({{username}})</a></li>
-{% else %}
-	{% block auth %} {% endblock %}
-{% endif %}
+
+{% block mainpage %}{% endblock %}
 	
 </body>
 
