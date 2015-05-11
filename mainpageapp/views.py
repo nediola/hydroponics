@@ -8,6 +8,7 @@ from mainpageapp.models import Plant, Mix, GardenBed
 from django.http import HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.contrib import auth
+from django.db.models import Max
 
 def enter(request):
 	if request.user.is_authenticated():
@@ -40,7 +41,19 @@ def logout(request):
 	return redirect('/')
 
 def home(request):
-	return render_to_response('home.html')
-	
-
-    
+	# Get data about gardenbeds from database and create home page
+	max_x = GardenBed.objects.all().aggregate(Max('gardenbed_posx'))
+	max_y = GardenBed.objects.all().aggregate(Max('gardenbed_posy'))
+	gardenbed_posx_max = max_x['gardenbed_posx__max']
+	gardenbed_posy_max = max_y['gardenbed_posy__max']
+	gardenbeds_list = []
+	for y in xrange(gardenbed_posy_max):
+		for x in xrange(gardenbed_posx_max):
+			gardenbeds = GardenBed.objects.filter(gardenbed_posx=x+1, gardenbed_posy=y+1)
+			if (len(gardenbeds) == 0):
+				gardenbeds_list.append(GardenBed(gardenbed_posx=x+1, gardenbed_posy=y+1))
+			else:
+				for g in gardenbeds:
+					gardenbeds_list.append(g)	
+	return render_to_response('home.html', {'gardenbeds' : gardenbeds_list, 'gardenbed_posx_max' : gardenbed_posx_max,
+		'gardenbed_posy_max' : gardenbed_posy_max})

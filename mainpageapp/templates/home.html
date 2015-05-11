@@ -1,7 +1,20 @@
 {% extends 'navbar.html' %}
+{% load staticfiles %}
 
 {% block subpage %}
 
-<p>HOME</p>
+  {% for gardenbed in gardenbeds %}
+    {% cycle '<div class="row">' '' '' ''%}
+    	<div class="col-xs-6 col-md-3">
+    		<a href="#myModal" class="thumbnail">
+    		{% if gardenbed.gardenbed_plant.plant_image_path %}
+    			<img src="{% static gardenbed.gardenbed_plant.plant_image_path %}" alt="{{gardenbed.gardenbed_plant.plant_name}}" height="100" width="100">
+    		{% else %}
+    			<img src="{% static 'add.png' %}" alt="Empty" height="100" width="100">
+    		{% endif %}
+    		</a>
+  	  	</div>
+    {% cycle '' '' '' '</div>' %}
+  {% endfor %}
 
 {% endblock subpage %}
