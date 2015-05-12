@@ -4,17 +4,79 @@
 {% block subpage %}
 
   {% for gardenbed in gardenbeds %}
+
     {% cycle '<div class="row">' '' '' ''%}
     	<div class="col-xs-6 col-md-3">
-    		<a href="#myModal" class="thumbnail">
     		{% if gardenbed.gardenbed_plant.plant_image_path %}
-    			<img src="{% static gardenbed.gardenbed_plant.plant_image_path %}" alt="{{gardenbed.gardenbed_plant.plant_name}}" height="100" width="100">
+    			<a href="" class="thumbnail openeditform" data-toggle="modal" data-target="#gModal" gardenbed-id="{{gardenbed.id}}">
+    				<img src="{% static gardenbed.gardenbed_plant.plant_image_path %}" alt="{{gardenbed.gardenbed_plant.plant_name}}" height="100" width="100" />
+    			</a>
     		{% else %}
-    			<img src="{% static 'add.png' %}" alt="Empty" height="100" width="100">
+    			<a href="" class="thumbnail" data-toggle="modal" data-target="#gModal" onmouseover="mouseOver()" onmouseout="mouseOut()">
+    				<img src="{% static 'add.png' %}" alt="Empty" height="100" width="100">
+    			</a>
     		{% endif %}
-    		</a>
+    		
   	  	</div>
     {% cycle '' '' '' '</div>' %}
-  {% endfor %}
+	{% endfor %}
+
+<!-- Edit form -->
+<div class="modal fade" id="gModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="modal-title"></h4>
+				</div>
+				<div class="modal-body">
+					<form id="editForm" action="#" method="post">
+  						<div class="form-group">
+      						<label for="selPlantName">Название</label>
+      						<select class="form-control" id="selPlantName">
+        						<!--<option>1</option>-->
+      						</select>
+    					</div>
+    					<div class="form-group">
+      						<label for="selPlantMix">Раствор</label>
+      						<select class="form-control" id="selPlantMix">
+        						<!--<option>1</option>-->
+      						</select>
+    					</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary">Save changes</button>
+				</div>
+		</div>
+	</div>
+</div>
+
+<!--FIXME move all js to other file-->
+<!--<script src="js/customscript.js" type="text/javascript"></script> --> 
+<script>
+/*$(".openeditform").click(function() {
+	gardenbed_id = $(this).attr('gardenbed-id');
+	send_data = "gardenbed_id=" + gardenbed_id;
+	$.ajax({
+  		type: "POST",
+  		url: "/get",
+  		data: send_data,
+  		success: function(json) {
+    		alert( "Прибыли данные: " + json );
+  		}
+	});
+
+	var modal_title = $('#gardenbedModalTitle');
+	var modal_sel_plant_name = document.getElementById("selPlantName");
+	var modal_sel_plant_mix = document.getElementById("selPlantMix");
+    modal_title.innerHTML = gardenbed_id;
+    //modal_sel_plant_name.value = 1;
+    //modal_sel_plant_mix.value = 5;
+});*/
+
+</script>
 
 {% endblock subpage %}
+
