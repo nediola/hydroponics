@@ -11,4 +11,6 @@ urlpatterns = [
     url(r'login/', 'mainpageapp.views.login'),
     url(r'logout/', 'mainpageapp.views.logout'),
     url(r'home/', 'mainpageapp.views.home'),
+    url(r'get_params/', 'mainpageapp.views.get_params'),
+    url(r'set_params/', 'mainpageapp.views.set_params'),
 ]

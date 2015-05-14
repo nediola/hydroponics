@@ -1,32 +1,141 @@
+current_gardenbed_id = 0;
+
 $(function() {
 	$('.openeditform').bind('click', function() {
 		onclick_gardenbed($(this).attr('gardenbed-id'));
 	});
 
+	var json_data = {};
+	json_data['type'] = 'plants_mixs';
+	json_str = JSON.stringify(json_data);
+	$.ajax({    
+	    type: 'POST',                                                                                                                                                                                            
+	  	url: '/get_params/',
+	  	data: json_str,                                                                                                                                              
+	    dataType: 'json', 
+	    success: first_fill_edit_form,
+	    error: function(xhr, text_status, exception ) {alert(text_status + exception);}                                                                                                                                                                                           
+   	});
+
+   	$('#sel-plant-name').change(function() {
+		$('#save-button').prop('disabled', false);
+		update_plant_description($('#sel-plant-name').val());
+	});
+
+	$('#sel-plant-mix').change(function() {
+		$('#save-button').prop('disabled', false);
+	});
+
+   	$('.chkbox').change(function() {
+		$('#save-button').prop('disabled', false);
+	});
+
+	$('#save-button').click(function() {
+		save_form_parameters();
+	});
 });
 
-/* Shows edit-form for current gardenbed */
-function onclick_gardenbed(gb_id) {
+function save_form_parameters() {
+	var json_data = {};
+	json_data['type'] = 'set_gardenbed';
+	json_data['gardenbed_id'] = current_gardenbed_id;
+	json_data['gardenbed_plant_id'] = $('#sel-plant-name').val();
+	json_data['gardenbed_mix_id'] = $('#sel-plant-mix').val();
+	time = '';
+	for (i = 0; i < 24; i++) {
+		if ($('#t' + i).is(':checked')) {
+			time += i;
+			time += ',';
+		}
+	}
+	json_data['gardenbed_time'] = time;
+	json_str = JSON.stringify(json_data);
 	$.ajax({    
-	    type: 'GET',                                                                                                                                                                                            
-	  	url: '/get_gardenbed/',
-	  	data: { gardenbed_id: gb_id},                                                                                                                                              
-	    dataType: 'jsonp', 
-	    jsonpCallback: "fill_edit_form",
-	    error: function(xhr, text_status, exception ) {alert('Baaaaad')}                                                                                                                                                                                           
+	    type: 'POST',                                                                                                                                                                                            
+	  	url: '/set_params/',
+	  	data: json_str,                                                                                                                                              
+	    dataType: 'json', 
+	    success: function(json) {alert(JSON.stringify(json))},
+	    error: function(xhr, text_status, exception ) {alert(text_status + exception);}                                                                                                                                                                                           
    	});
 }
 
 
-function fill_edit_form(jsonp)
-{
-	//results_amount = jsonp.amount;
-	//$('#results_number').text("Результатов: " + results_amount);	
+function update_plant_description(plant_id) {
+	var json_data = {};
+	json_data['type'] = 'plant_description';
+	json_data['plant_id'] = plant_id;
+	json_str = JSON.stringify(json_data);
+	$.ajax({    
+	    type: 'POST',                                                                                                                                                                                            
+	  	url: '/get_params/',
+	  	data: json_str,                                                                                                                                              
+	    dataType: 'json', 
+	    success: function(json) {$("#plant-description").text(json.plant_description)},
+	    error: function(xhr, text_status, exception ) {alert(text_status + exception);}                                                                                                                                                                                           
+   	});
+}
 
-	var modal_title = $('#modal-title');
-	//modal_title.append(gardenbed_id);
+function first_fill_edit_form(json) {
 	var modal_sel_plant_name = $("#sel-plant-name");
 	var modal_sel_plant_mix = $("#sel-plant-mix");
+	plants = json.plants;
+	mixs = json.mixs;
+	for (var property in plants) {
+    	if (plants.hasOwnProperty(property)) {
+        	modal_sel_plant_name.append('<option value="' + property + '">' + plants[property] + '</option>');
+    	}
+	}
+ 	for (var property in mixs) {
+    	if (mixs.hasOwnProperty(property)) {
+        	modal_sel_plant_mix.append('<option value="' + property + '">' + mixs[property] + '</option>');
+    	}
+	}
+}
+
+/* Shows edit-form for current gardenbed */
+function onclick_gardenbed(gb_id) {
+	current_gardenbed_id = gb_id;
+	var json_data = {};
+	json_data['type'] = 'gardenbed';
+	json_data['gardenbed_id'] = gb_id;
+	json_str = JSON.stringify(json_data);
+	$.ajax({    
+	    type: 'POST',                                                                                                                                                                                            
+	  	url: '/get_params/',
+	  	data: json_str,                                                                                                                                              
+	    dataType: 'json', 
+	    success: fill_edit_form,
+	    error: function(xhr, text_status, exception ) {alert(text_status + exception);}                                                                                                                                                                                           
+   	});
+}
+
+function fill_edit_form(json) {
+	modal_title = $('#modal-title');
+	modal_sel_plant_name = $('#sel-plant-name');
+	modal_plant_description = $('#plant-description');
+	modal_sel_plant_mix = $('#sel-plant-mix');
+	
+	gardenbed_name = 'Номер участка: ' + json.gardenbed_name;
+	gardenbed_plant_id = json.gardenbed_plant_id;
+	gardenbed_plant_description = json.gardenbed_plant_description;
+	gardenbed_time = json.gardenbed_time;
+	gardenbed_parsed_time = gardenbed_time.split(',');
+	gardenbed_mix_id = json.gardenbed_mix_id;
+	modal_title.text(gardenbed_name);
+	modal_plant_description.text(gardenbed_plant_description);
+	modal_sel_plant_name.val(gardenbed_plant_id);
+	modal_sel_plant_mix.val(gardenbed_mix_id);
+	for (i = 0; i < 24; i++) {
+		$('#t' + i).attr('checked', false);
+	}
+	$('.chkbox').each(function() {
+    	this.checked = false;  //select all checkboxes with class "checkbox1"              
+    });
+	$.each(gardenbed_parsed_time, function(index, value) {
+  		$('#t'+ value.replace(/\s+/g, '')).prop('checked', true);
+	});
+	$('#save-button').prop('disabled', true);
 }
 
 function mouse_over() {

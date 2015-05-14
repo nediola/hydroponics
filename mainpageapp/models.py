@@ -5,7 +5,7 @@ class Plant(models.Model):
 		db_table = 'plant'
 	plant_name = models.CharField(max_length=256, unique=True)
 	plant_description = models.TextField()
-	plant_image_path = models.CharField(max_length=500, unique=True)
+	plant_image_path = models.CharField(max_length=512, unique=True)
 
 class Mix(models.Model):
 	class Meta():
@@ -18,5 +18,13 @@ class GardenBed(models.Model):
 		db_table = 'gardenbed'
 	gardenbed_posx = models.IntegerField(default=0)
 	gardenbed_posy = models.IntegerField(default=0)
+	gardenbed_name = models.CharField(max_length=256, unique=True)
+	gardenbed_time = models.CharField(max_length=512)
 	gardenbed_plant = models.ForeignKey(Plant)
 	gardenbed_mix = models.ForeignKey(Mix)
+	
+	def get_gardenbed_posx(self):
+		return self.gardenbed_posx
+		
+	def get_gardenbed_posy(self):
+		return self.gardenbed_posy
