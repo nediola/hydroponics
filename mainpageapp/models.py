@@ -19,9 +19,9 @@ class GardenBed(models.Model):
 	gardenbed_posx = models.IntegerField(default=0)
 	gardenbed_posy = models.IntegerField(default=0)
 	gardenbed_name = models.CharField(max_length=256, unique=True)
-	gardenbed_time = models.CharField(max_length=512)
-	gardenbed_plant = models.ForeignKey(Plant)
-	gardenbed_mix = models.ForeignKey(Mix)
+	gardenbed_time = models.CharField(max_length=512, blank=True, null=True)
+	gardenbed_plant = models.ForeignKey(Plant, blank=True, null=True)
+	gardenbed_mix = models.ForeignKey(Mix, blank=True, null=True)
 	
 	def get_gardenbed_posx(self):
 		return self.gardenbed_posx

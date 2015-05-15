@@ -33,7 +33,21 @@ $(function() {
 	$('#save-button').click(function() {
 		save_form_parameters();
 	});
+
+	$('#clear-all-button').click(function() {
+		clear_all_form_parameters();
+	});
 });
+
+function clear_all_form_parameters() {
+	$('#sel-plant-name').val('');
+	$('#sel-plant-mix').val('');
+	$('#plant-description').text('');
+	$('.chkbox').each(function() {
+    	this.checked = false;            
+    });
+	$('#save-button').prop('disabled', false);
+}
 
 function save_form_parameters() {
 	var json_data = {};
@@ -115,26 +129,42 @@ function fill_edit_form(json) {
 	modal_sel_plant_name = $('#sel-plant-name');
 	modal_plant_description = $('#plant-description');
 	modal_sel_plant_mix = $('#sel-plant-mix');
-	
 	gardenbed_name = 'Номер участка: ' + json.gardenbed_name;
-	gardenbed_plant_id = json.gardenbed_plant_id;
-	gardenbed_plant_description = json.gardenbed_plant_description;
-	gardenbed_time = json.gardenbed_time;
-	gardenbed_parsed_time = gardenbed_time.split(',');
-	gardenbed_mix_id = json.gardenbed_mix_id;
 	modal_title.text(gardenbed_name);
-	modal_plant_description.text(gardenbed_plant_description);
-	modal_sel_plant_name.val(gardenbed_plant_id);
-	modal_sel_plant_mix.val(gardenbed_mix_id);
-	for (i = 0; i < 24; i++) {
-		$('#t' + i).attr('checked', false);
+
+	gardenbed_plant_id = json.gardenbed_plant_id;
+	if (gardenbed_plant_id) {
+		modal_sel_plant_name.val(gardenbed_plant_id);
+		gardenbed_plant_description = json.gardenbed_plant_description;
+		if (modal_plant_description) {
+			modal_plant_description.text(gardenbed_plant_description);
+		} 
+		else {
+			modal_plant_description.text('');
+		}
+	} 
+	else {
+		modal_sel_plant_name.val('');
+		modal_plant_description.text('');
 	}
+	gardenbed_mix_id = json.gardenbed_mix_id;
+	if (gardenbed_mix_id) {
+		modal_sel_plant_mix.val(gardenbed_mix_id);
+	} 
+	else {
+		modal_sel_plant_mix.val('');
+	}
+
 	$('.chkbox').each(function() {
-    	this.checked = false;  //select all checkboxes with class "checkbox1"              
+    	this.checked = false;            
     });
-	$.each(gardenbed_parsed_time, function(index, value) {
-  		$('#t'+ value.replace(/\s+/g, '')).prop('checked', true);
-	});
+	gardenbed_time = json.gardenbed_time;
+	if (gardenbed_time) {
+		gardenbed_parsed_time = gardenbed_time.split(',');
+		$.each(gardenbed_parsed_time, function(index, value) {
+  			$('#t'+ value.replace(/\s+/g, '')).prop('checked', true);
+		});
+	}
 	$('#save-button').prop('disabled', true);
 }
 

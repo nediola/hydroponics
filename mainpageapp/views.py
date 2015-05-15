@@ -11,6 +11,9 @@ from django.contrib import auth
 from django.db.models import Max
 from django.http import JsonResponse
 import json
+import string
+
+gardenbed_y_names = list(string.ascii_uppercase)
 
 def enter(request):
 	if request.user.is_authenticated():
@@ -53,7 +56,12 @@ def home(request):
 		for x in xrange(gardenbed_posx_max):
 			gardenbeds = GardenBed.objects.filter(gardenbed_posx=x+1, gardenbed_posy=y+1) #FIXME it is awful
 			if (len(gardenbeds) == 0):
-				gardenbeds_list.append(GardenBed(gardenbed_posx=x+1, gardenbed_posy=y+1))
+				#create new gardenbed
+				gardenbed_name = str(x+1) + gardenbed_y_names[y]
+				empty_gardenbed = GardenBed.objects.create(gardenbed_posx=x+1, gardenbed_posy=y+1, 
+					gardenbed_name = gardenbed_name)
+				#empty_gardenbed = GardenBed(gardenbed_posx=x+1, gardenbed_posy=y+1)
+				gardenbeds_list.append(empty_gardenbed)
 			else:
 				for g in gardenbeds:
 					gardenbeds_list.append(g)	
@@ -77,10 +85,13 @@ def get_gardenbed_json(gardenbed_id):
 	resp_data = {}
 	gardenbed = GardenBed.objects.get(id=gardenbed_id)
 	resp_data['gardenbed_name'] = gardenbed.gardenbed_name
-	resp_data['gardenbed_plant_id'] = gardenbed.gardenbed_plant.id
-	resp_data['gardenbed_plant_description'] = gardenbed.gardenbed_plant.plant_description
-	resp_data['gardenbed_time'] = gardenbed.gardenbed_time
-	resp_data['gardenbed_mix_id'] = gardenbed.gardenbed_mix.id
+	if gardenbed.gardenbed_plant is not None:
+		resp_data['gardenbed_plant_id'] = gardenbed.gardenbed_plant.id
+		resp_data['gardenbed_plant_description'] = gardenbed.gardenbed_plant.plant_description
+	if gardenbed.gardenbed_time is not None:
+		resp_data['gardenbed_time'] = gardenbed.gardenbed_time
+	if gardenbed.gardenbed_mix is not None:
+		resp_data['gardenbed_mix_id'] = gardenbed.gardenbed_mix.id
 	return resp_data
 
 def get_plants_mixs_json():
@@ -114,8 +125,17 @@ def set_params(request):
 
 def set_gardenbed_json(decoded_json):
 	gardenbed = GardenBed.objects.get(id=decoded_json['gardenbed_id'])
-	gardenbed.gardenbed_plant = Plant.objects.get(id=decoded_json['gardenbed_plant_id'])
-	gardenbed.gardenbed_mix = Mix.objects.get(id=decoded_json['gardenbed_mix_id'])
-	gardenbed.gardenbed_time = decoded_json['gardenbed_time']
-	gardenbed.save() # this will update only
+	if (decoded_json['gardenbed_plant_id']):
+		gardenbed.gardenbed_plant = Plant.objects.get(id=decoded_json['gardenbed_plant_id'])
+	else:
+		gardenbed.gardenbed_plant = None
+	if (decoded_json['gardenbed_mix_id']):
+		gardenbed.gardenbed_mix = Mix.objects.get(id=decoded_json['gardenbed_mix_id'])
+	else:
+		gardenbed.gardenbed_mix = None
+	if (decoded_json['gardenbed_time']):
+		gardenbed.gardenbed_time = decoded_json['gardenbed_time']
+	else:
+		gardenbed.gardenbed_time = None
+	gardenbed.save()
 	return {'status':'Saved'}
