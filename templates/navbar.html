@@ -17,24 +17,24 @@
       
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li class="active"><a href="/home">Home</a></li>
-          <li><a href="/base">Base</a></li>
-          <li><a href="/robot">Robot</a></li>
+          <li class="active"><a href="/home">Домашняя страница</a></li>
+          <li><a href="/base">База</a></li>
+          <li><a href="/robot">Робот</a></li>
           <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Редактировать...<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="#">Action</a></li>
-              <li><a href="#">Another action</a></li>
-              <li><a href="#">Something else here</a></li>
-              <li class="divider"></li>
-              <li class="dropdown-header">Nav header</li>
-              <li><a href="#">Separated link</a></li>
-              <li><a href="#">One more separated link</a></li>
+              <li>
+                <a href="" class="thumbnail editplants" data-toggle="modal" data-target="#gEditPlantModal">Растения</a>
+              </li>
+              <li>
+                <a href="" class="thumbnail editingredients" data-toggle="modal" data-target="#gEditIngredientModal">Ингредиенты</a>
+              </li>
+              <li><a href="#">Растворы</a></li>
             </ul>
           </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          <a class="btn btn-lg" href="/logout" role="button">Logout</a>
+          <a class="btn btn-lg" href="/logout" role="button">Выйти</a>
         </ul>
       </div>
     </div>
@@ -44,6 +44,72 @@
     {% block subpage %} {% endblock %}
   </div>
 
+</div>
+
+<!-- Plants edit form -->
+<div class="modal fade" id="gEditPlantModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="modal-title-plant-edit">Растения</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="selPlantName">Название</label>
+            <select class="form-control" id="edit-plant-name">
+              <!--<option>1</option>-->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-plant-description">Описание растения</label>
+            <textarea class="form-control" rows="3" id="edit-plant-description"></textarea>
+          </div>
+          <div class="btn-group" role="group" aria-label="...">
+            <button type="button" class="btn btn-primary" id="edit-plant-new-button">+Добавить</button>
+            <button type="button" class="btn btn-success" id="edit-plant-save-button">Сохранить</button>
+            <button type="button" class="btn btn-danger" id="edit-plant-delete-button">Удалить</button>
+          </div>
+        <div class="modal-footer">
+          <cont></cont>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Ingredients edit form -->
+<div class="modal fade" id="gEditIngredientModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="modal-title-ingredient-edit">Ингредиенты</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="selIngredientName">Название</label>
+            <select class="form-control" id="edit-ingredient-name">
+              <!--<option>1</option>-->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-ingredient-description">Описание ингредиента</label>
+            <textarea class="form-control" rows="3" id="edit-ingredient-description"></textarea>
+          </div>
+          <div class="btn-group" role="group" aria-label="...">
+            <button type="button" class="btn btn-primary" id="edit-ingredient-new-button">+Добавить</button>
+            <button type="button" class="btn btn-success" id="edit-ingredient-save-button">Сохранить</button>
+            <button type="button" class="btn btn-danger" id="edit-ingredient-delete-button">Удалить</button>
+          </div>
+        <div class="modal-footer">
+          <cont>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+        </div>
+    </div>
+  </div>
+</div>
 </div>
 
 {% endblock %}

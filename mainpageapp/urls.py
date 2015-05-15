@@ -13,4 +13,6 @@ urlpatterns = [
     url(r'home/', 'mainpageapp.views.home'),
     url(r'get_params/', 'mainpageapp.views.get_params'),
     url(r'set_params/', 'mainpageapp.views.set_params'),
+    url(r'set_plants/', 'mainpageapp.views.set_plants'),
+    url(r'set_ingredients/', 'mainpageapp.views.set_ingredients'),
 ]

@@ -4,7 +4,7 @@ from django.http.response import HttpResponse
 from django.template.loader import get_template
 from django.template import Context
 from django.shortcuts import render_to_response, redirect
-from mainpageapp.models import Plant, Mix, GardenBed
+from mainpageapp.models import Plant, Mix, GardenBed, Ingredient
 from django.http import HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.contrib import auth
@@ -79,6 +79,10 @@ def get_params(request):
 			return JsonResponse(get_plants_mixs_json())
 		if (req_type == 'plant_description'):
 			return JsonResponse(get_plant_description_json(decoded_json['plant_id']))
+		if (req_type == 'ingredients'):
+			return JsonResponse(get_ingredients_json())
+		if (req_type == 'ingredient_description'):
+			return JsonResponse(get_ingredient_description_json(decoded_json['ingredient_id']))
 		return JsonResponse({'error':'unknown type of request'})
 
 def get_gardenbed_json(gardenbed_id):
@@ -114,6 +118,22 @@ def get_plant_description_json(plant_id):
 	resp_data['plant_description'] = plant.plant_description
 	return resp_data
 
+def get_ingredients_json():
+	resp_data = {}
+	ingredients_names = {}
+	ingredients = Ingredient.objects.all()
+	for i in ingredients:
+		ingredients_names[i.id] = i.ingredient_name
+	resp_data['ingredients'] = ingredients_names
+	return resp_data
+
+def get_ingredient_description_json(ingredient_id):
+	resp_data = {}
+	ingredient = Ingredient.objects.get(id=ingredient_id)
+	resp_data['ingredient_description'] = ingredient.ingredient_description
+	return resp_data
+
+
 def set_params(request):
 	if (request.method == "POST" and request.is_ajax()):
 		str_json = request.body
@@ -139,3 +159,72 @@ def set_gardenbed_json(decoded_json):
 		gardenbed.gardenbed_time = None
 	gardenbed.save()
 	return {'status':'Saved'}
+
+def set_plants(request):
+	if (request.method == "POST" and request.is_ajax()):
+		str_json = request.body
+		decoded_json = json.loads(str_json)
+		req_type = decoded_json['type']
+		if (req_type == 'new'):
+			return JsonResponse(set_plants_new_json(decoded_json))
+		if (req_type == 'save'):
+			return JsonResponse(set_plants_save_json(decoded_json))
+		if (req_type == 'delete'):
+			return JsonResponse(set_plants_delete_json(decoded_json))
+		return JsonResponse({'error':'unknown type of request'})
+
+def set_plants_new_json(decoded_json):
+	print decoded_json
+	plant = Plant.objects.create(
+		plant_name=decoded_json['plant_name'],
+		plant_description=decoded_json['plant_description'],
+		plant_image_path = decoded_json['plant_image_path']
+	)
+	return {'status':'Added', 'id':plant.id}
+
+def set_plants_save_json(decoded_json):
+	plant = Plant.objects.get(id=decoded_json['plant_id'])
+	if (decoded_json['plant_description']):
+		plant.plant_description = decoded_json['plant_description']
+	if (decoded_json['plant_image_path']):
+		plant.plant_image_path = decoded_json['plant_image_path']
+	plant.save()
+	return {'status':'Saved'}
+
+def set_plants_delete_json(decoded_json):
+	plant = Plant.objects.get(id=decoded_json['plant_id'])
+	plant.delete()
+	return {'status':'Deleted'}
+
+def set_ingredients(request):
+	if (request.method == "POST" and request.is_ajax()):
+		str_json = request.body
+		decoded_json = json.loads(str_json)
+		req_type = decoded_json['type']
+		if (req_type == 'new'):
+			return JsonResponse(set_ingredients_new_json(decoded_json))
+		if (req_type == 'save'):
+			return JsonResponse(set_ingredients_save_json(decoded_json))
+		if (req_type == 'delete'):
+			return JsonResponse(set_ingredients_delete_json(decoded_json))
+		return JsonResponse({'error':'unknown type of request'})
+
+def set_ingredients_new_json(decoded_json):
+	print decoded_json
+	ingredient = Ingredient.objects.create(
+		ingredient_name=decoded_json['ingredient_name'],
+		ingredient_description=decoded_json['ingredient_description']
+	)
+	return {'status':'Added', 'id':ingredient.id}
+
+def set_ingredients_save_json(decoded_json):
+	ingredient = Ingredient.objects.get(id=decoded_json['ingredient_id'])
+	if (decoded_json['ingredient_description']):
+		ingredient.ingredient_description = decoded_json['ingredient_description']
+	ingredient.save()
+	return {'status':'Saved'}
+
+def set_ingredients_delete_json(decoded_json):
+	ingredient = Ingredient.objects.get(id=decoded_json['ingredient_id'])
+	ingredient.delete()
+	return {'status':'Deleted'}

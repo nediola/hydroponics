@@ -7,6 +7,12 @@ class Plant(models.Model):
 	plant_description = models.TextField()
 	plant_image_path = models.CharField(max_length=512, unique=True)
 
+class Ingredient(models.Model):
+	class Meta():
+		db_table = 'ingredient'
+	ingredient_name = models.CharField(max_length=256, unique=True)
+	ingredient_description = models.TextField()
+
 class Mix(models.Model):
 	class Meta():
 		db_table = 'mix'
