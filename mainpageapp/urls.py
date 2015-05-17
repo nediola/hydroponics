@@ -15,4 +15,7 @@ urlpatterns = [
     url(r'set_params/', 'mainpageapp.views.set_params'),
     url(r'set_plants/', 'mainpageapp.views.set_plants'),
     url(r'set_ingredients/', 'mainpageapp.views.set_ingredients'),
+    url(r'add_plant/', 'mainpageapp.views.add_plant'),
+    url(r'set_mixs/', 'mainpageapp.views.set_mixs'),
+    url(r'mixs/', 'mainpageapp.views.mixs'),
 ]

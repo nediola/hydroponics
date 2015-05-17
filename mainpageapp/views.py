@@ -4,7 +4,8 @@ from django.http.response import HttpResponse
 from django.template.loader import get_template
 from django.template import Context
 from django.shortcuts import render_to_response, redirect
-from mainpageapp.models import Plant, Mix, GardenBed, Ingredient
+from mainpageapp.models import Plant, Mix, GardenBed, Ingredient, Proportion
+from mainpageapp.forms import MixForm
 from django.http import HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.contrib import auth
@@ -228,3 +229,93 @@ def set_ingredients_delete_json(decoded_json):
 	ingredient = Ingredient.objects.get(id=decoded_json['ingredient_id'])
 	ingredient.delete()
 	return {'status':'Deleted'}
+
+ 
+def add_plant(request):
+	if request.method == 'POST':
+		plant_name = request.POST['plant_name']
+		plant_description = request.POST['plant_description']
+		plant_image_name = plant_name + '.png'
+		handle_uploaded_file(request.FILES['plant_image'], plant_image_name)
+		plant = Plant.objects.create(
+					plant_name=plant_name,
+					plant_description=plant_description,
+					plant_image_path=plant_image_name
+		) 
+	return HttpResponseRedirect('/')
+
+def handle_uploaded_file(f, plant_image_name):
+	plant_image_path = 'static/' + plant_image_name
+	destination = open(plant_image_path, 'wb+')
+	for chunk in f.chunks():
+		destination.write(chunk)
+	destination.close()
+	return
+
+# MIXS
+def mixs(request):
+	args = {}
+	if request.method == 'GET':
+		mixs = Mix.objects.all()
+		args['mixs'] = mixs
+		ingredients = Ingredient.objects.all()
+		args['ingredients'] = ingredients
+		return render_to_response('mixs.html', args)
+	if request.method =='POST':
+		mix_id = request.POST['mix_id']
+		mix_description = request.POST['mix_description']
+		mix = Mix.objects.get(id=mix_id)
+		mix.mix_description = mix_description
+		mix.save()
+		new_proportion_ingredient_names = []
+		new_proportion_amounts = []
+		for p in mix.mix_proportions.all():
+			ingredient_id = p.proportion_ingredient.id
+			ingredient_amount = request.POST['ingredient_amount_'+ str(ingredient_id)]
+			if (ingredient_amount == p.proportion_ingredient_amount):
+				continue
+			proportion = Proportion.objects.filter(proportion_ingredient_id=ingredient_id, 
+				proportion_ingredient_amount=ingredient_amount)
+			if proportion:
+				mix.mix_proportions.add(proportion)
+			else:
+				proportion = mix.mix_proportions.create(proportion_ingredient=Ingredient.objects.get(id=ingredient_id), proportion_ingredient_amount=ingredient_amount)
+			mix.mix_proportions.remove(p)
+			mix.save()
+		return redirect('/mixs/')
+	return render_to_response('mixs.html', args)
+
+def set_mixs(request):
+	if (request.method == "POST" and request.is_ajax()):
+		str_json = request.body
+		decoded_json = json.loads(str_json)
+		req_type = decoded_json['type']
+		if (req_type == 'new'):
+			return JsonResponse(set_mixs_new_json(decoded_json))
+		if (req_type == 'delete'):
+			return JsonResponse(set_mixs_delete_json(decoded_json))
+		return JsonResponse({'error':'unknown type of request'})
+	return JsonResponse({'error':'unsupported request'})
+	
+
+def set_mixs_delete_json(decoded_json):
+	mix = Mix.objects.get(id=decoded_json['mix_id'])
+	mix.delete()
+	return {'status':'Deleted'}
+
+def set_mixs_new_json(decoded_json):
+	proportion_ids = []
+	ingredients = decoded_json['ingredients']
+	mix = Mix.objects.create(mix_name=decoded_json['mix_name'], mix_description=decoded_json['mix_description'])
+	for i in ingredients:
+		print i, ingredients[i]
+		proportion = Proportion.objects.filter(proportion_ingredient_id=i, 
+				proportion_ingredient_amount=ingredients[i])
+		if proportion:
+			mix.mix_proportions.add(proportion)
+		else:
+			proportion = mix.mix_proportions.create(proportion_ingredient=Ingredient.objects.get(id=i), proportion_ingredient_amount=ingredients[i])
+			#proportion.save()
+			#mix.mix_proportions.add(proportion)
+	mix.save()
+	return {'status':'Added'}

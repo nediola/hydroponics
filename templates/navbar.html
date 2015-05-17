@@ -29,7 +29,7 @@
               <li>
                 <a href="" class="thumbnail editingredients" data-toggle="modal" data-target="#gEditIngredientModal">Ингредиенты</a>
               </li>
-              <li><a href="#">Растворы</a></li>
+              <li><a href="/mixs">Растворы</a></li>
             </ul>
           </li>
         </ul>
@@ -64,9 +64,9 @@
           <div class="form-group">
             <label for="edit-plant-description">Описание растения</label>
             <textarea class="form-control" rows="3" id="edit-plant-description"></textarea>
-          </div>
+          </div>  
           <div class="btn-group" role="group" aria-label="...">
-            <button type="button" class="btn btn-primary" id="edit-plant-new-button">+Добавить</button>
+            <button type="button" class="btn btn-primary" id="edit-plant-new-button" data-toggle="modal" data-target="#gAddPlantModal">+Добавить</button>
             <button type="button" class="btn btn-success" id="edit-plant-save-button">Сохранить</button>
             <button type="button" class="btn btn-danger" id="edit-plant-delete-button">Удалить</button>
           </div>
@@ -77,6 +77,35 @@
     </div>
   </div>
 </div>
+</div>
+
+<!-- Plants add form -->
+<div class="modal fade" id="gAddPlantModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modal-title-plant-add">Добавить растение</h4>
+      </div>
+      <div class="modal-body">
+        <form action="/add_plant/" enctype="multipart/form-data" method="POST">
+          <div class="form-group">
+            <label for="add_plant_name">Название растения:</label>
+            <input id="add_plant_name" name="plant_name" type="text" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="add_plant_description">Описание растения:</label>
+            <textarea id="add_plant_description" name="plant_description" class="form-control"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="add_plant_image">Изображение</label>
+            <input id="add_plant_image" name="plant_image" type="file" required="required" title="Необходимо выбрать изображение" />
+          </div>
+          <input type="submit" class="btn btn-primary" value="ОК"/>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Ingredients edit form -->

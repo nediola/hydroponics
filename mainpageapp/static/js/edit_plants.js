@@ -3,9 +3,9 @@ $(function() {
 		onclick_edit_plants();
 	});
 
-	$('#edit-plant-new-button').click(function() {
+	/*$('#edit-plant-new-button').click(function() {
 		edit_plant_new_handler();
-	});
+	});*/
 
 	$('#edit-plant-save-button').click(function() {
 		edit_plant_save_handler();
@@ -48,7 +48,7 @@ function first_fill_edit_plants_form(json) {
 }
 
 function edit_plant_new_handler(json) {
-	var json_data = {};
+	/*var json_data = {};
 	json_data['type'] = 'new';
 	plant_name = prompt("Пожалуйста, введите название растения", "Название растения");
 	if (plant_name == '' || plant_name == null) {
@@ -73,7 +73,7 @@ function edit_plant_new_handler(json) {
 	    },
 
 	    error: function(xhr, text_status, exception ) {alert(text_status + exception);}                                                                                                                                                                                           
-   	});
+   	});*/
 }
 
 function edit_plant_save_handler(json) {

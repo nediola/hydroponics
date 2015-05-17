@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ModelForm
 
 class Plant(models.Model):
 	class Meta():
@@ -13,11 +14,18 @@ class Ingredient(models.Model):
 	ingredient_name = models.CharField(max_length=256, unique=True)
 	ingredient_description = models.TextField()
 
+class Proportion(models.Model):
+	class Meta():
+		db_table = 'proportion'
+	proportion_ingredient = models.ForeignKey(Ingredient, blank=True, null=True)
+	proportion_ingredient_amount = models.IntegerField(default=0)
+
 class Mix(models.Model):
 	class Meta():
 		db_table = 'mix'
 	mix_name = models.CharField(max_length=256, unique=True)
 	mix_description = models.CharField(max_length=256)
+	mix_proportions = models.ManyToManyField(Proportion, blank=True)
 
 class GardenBed(models.Model):
 	class Meta():
