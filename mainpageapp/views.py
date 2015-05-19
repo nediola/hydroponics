@@ -4,7 +4,7 @@ from django.http.response import HttpResponse
 from django.template.loader import get_template
 from django.template import Context
 from django.shortcuts import render_to_response, redirect
-from mainpageapp.models import Plant, Mix, GardenBed, Ingredient, Proportion
+from mainpageapp.models import Plant, Mix, GardenBed, Ingredient, Proportion, Tank, Task, Base, Robot
 from mainpageapp.forms import MixForm
 from django.http import HttpResponseRedirect
 from django.core.context_processors import csrf
@@ -134,7 +134,6 @@ def get_ingredient_description_json(ingredient_id):
 	resp_data['ingredient_description'] = ingredient.ingredient_description
 	return resp_data
 
-
 def set_params(request):
 	if (request.method == "POST" and request.is_ajax()):
 		str_json = request.body
@@ -145,21 +144,55 @@ def set_params(request):
 		return JsonResponse({'error':'unknown type of request'})
 
 def set_gardenbed_json(decoded_json):
+	if not(decoded_json['gardenbed_plant_id']) and (decoded_json['gardenbed_mix_id']) and (decoded_json['gardenbed_time']):
+		return {'ошибка':'Заполните все поля'}
 	gardenbed = GardenBed.objects.get(id=decoded_json['gardenbed_id'])
-	if (decoded_json['gardenbed_plant_id']):
-		gardenbed.gardenbed_plant = Plant.objects.get(id=decoded_json['gardenbed_plant_id'])
+	gardenbed.gardenbed_plant = Plant.objects.get(id=decoded_json['gardenbed_plant_id'])
+	gardenbed.gardenbed_mix = Mix.objects.get(id=decoded_json['gardenbed_mix_id'])
+	gardenbed.gardenbed_time = decoded_json['gardenbed_time']
+	status = create_tasks(gardenbed)
+	if status =='OK':
+		gardenbed.save()
+		return {'статус':'Сохранено'}
 	else:
-		gardenbed.gardenbed_plant = None
-	if (decoded_json['gardenbed_mix_id']):
-		gardenbed.gardenbed_mix = Mix.objects.get(id=decoded_json['gardenbed_mix_id'])
-	else:
-		gardenbed.gardenbed_mix = None
-	if (decoded_json['gardenbed_time']):
-		gardenbed.gardenbed_time = decoded_json['gardenbed_time']
-	else:
-		gardenbed.gardenbed_time = None
-	gardenbed.save()
-	return {'status':'Saved'}
+		return {'ошибка':status}
+
+def create_tasks(gardenbed):
+	mix = gardenbed.gardenbed_mix
+	proportions = {}
+	for p in mix.mix_proportions.all():
+		tank = p.proportion_ingredient.tank
+		ingredient_amount = p.proportion_ingredient_amount
+		if (tank.tank_current_volume >= ingredient_amount):
+			proportions[int(tank.tank_id)] = ingredient_amount
+		else:
+			return 'Не хватает ингредиентов для выполнения задания'
+	all_str_time = gardenbed.gardenbed_time.split(',')
+	all_int_time = []
+	for st in all_str_time:
+		try:
+			all_int_time.append(int(st))
+		except ValueError:
+			continue
+	for t in all_int_time:
+		task_cmd = {}
+		task_cmd['gardenbed_id'] = gardenbed.id
+		task_cmd['gardenbed_name'] = gardenbed.gardenbed_name
+		task_cmd['gardenbed_posx'] = gardenbed.gardenbed_posx
+		task_cmd['gardenbed_posy'] = gardenbed.gardenbed_posy
+		task_cmd['proportions'] = proportions
+		task_cmd['time'] = t
+		task_cmd_json = json.dumps(task_cmd)
+		print(task_cmd_json)
+		task = Task.objects.filter(task_gardenbed_id=gardenbed.id, task_time=t)
+		if task:
+			if task.task_json != task_cmd_json:
+				task.task_json = task_cmd_json
+				task.task_sent_to_base = 0
+				task.save()
+		else:
+			task = Task.objects.create(task_gardenbed_id=gardenbed.id, task_time=t, task_json=task_cmd_json)
+	return 'OK'
 
 def set_plants(request):
 	if (request.method == "POST" and request.is_ajax()):
