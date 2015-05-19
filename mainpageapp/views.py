@@ -167,6 +167,11 @@ def create_tasks(gardenbed):
 			proportions[int(tank.tank_id)] = ingredient_amount
 		else:
 			return 'Не хватает ингредиентов для выполнения задания'
+
+	#remove all tasks by gardenbed_id
+	Task.objects.filter(task_gardenbed_id=gardenbed.id).delete()
+	
+	#add new tasks for this gardenbed
 	all_str_time = gardenbed.gardenbed_time.split(',')
 	all_int_time = []
 	for st in all_str_time:
@@ -184,14 +189,7 @@ def create_tasks(gardenbed):
 		task_cmd['time'] = t
 		task_cmd_json = json.dumps(task_cmd)
 		print(task_cmd_json)
-		task = Task.objects.filter(task_gardenbed_id=gardenbed.id, task_time=t)
-		if task:
-			if task.task_json != task_cmd_json:
-				task.task_json = task_cmd_json
-				task.task_sent_to_base = 0
-				task.save()
-		else:
-			task = Task.objects.create(task_gardenbed_id=gardenbed.id, task_time=t, task_json=task_cmd_json)
+		task = Task.objects.create(task_gardenbed_id=gardenbed.id, task_time=t, task_json=task_cmd_json)
 	return 'OK'
 
 def set_plants(request):
