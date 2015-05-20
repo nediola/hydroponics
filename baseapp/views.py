@@ -29,7 +29,7 @@ def get_tasks(request):
 			tasks_for_base.append(t.task_json)
 			gardenbed_ids[t.task_gardenbed_id] = 1
 			t.task_sent_to_base = 1
-			t.save() #FIXME TEMP TO DEBUG. ADD: save()
+			t.save #FIXME TEMP TO DEBUG. ADD: save()
 		shell['gardenbed_ids'] = gardenbed_ids.keys()
 		shell['tasks'] = tasks_for_base
 		return JsonResponse(shell)

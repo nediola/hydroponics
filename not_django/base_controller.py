@@ -24,19 +24,18 @@ class TimerThread(threading.Thread):
 			time.sleep(self.interval)
 
 class Task:
-	#def __init__(self, gb_id):
-	#	self.gb_id = gb_id
-	def __init__(self, gb_id, task_time, gb_x, gb_y, proportions,task_id):
+	def __init__(self, gb_id=0, task_time=0, gb_x=0, gb_y=0, proportions={}, 
+		rbt_id = 0, rbt_tank_v = 0, rbt_ip='', multiply=False, ord_tasks=[]):
 		self.gb_id = gb_id
 		self.time = task_time
-		self.gb_x = gb_x,
-		self.gb_y = gb_y,
+		self.gb_x = gb_x
+		self.gb_y = gb_y
+		self.rbt_id = rbt_id
+		self.rbt_tank_v = rbt_tank_v
+		self.rbt_ip = rbt_ip
 		self.proportions = proportions
-		self.id = task_id
-
-	#def __del__(self):
-	#	pass
-		#print 'delete task {1}'.format(self.id)
+		self.multiply = multiply
+		self.ordinary_tasks = ord_tasks
 
 	def equals(self, task):
 		if self.gb_id != task.gb_id:
@@ -49,14 +48,54 @@ class Task:
 			return False
 		if self.proportions != task.proportions:
 			return False
+		if self.rbt_id != task.rbt_id:
+			return False
+		if self.rbt_tank_v != task.rbt_tank_v:
+			return False
+		if self.rbt_ip != task.rbt_ip:
+			return False
 		return True
+#-------------------------DEBUG_FUNCTIONS____________________#	
+def print_fields(task):
+	print_dict = {}
+	print_dict['gardenbed_id'] = task.gb_id
+	print_dict['time'] = task.time
+	print_dict['gb_x'] = task.gb_x
+	print_dict['gb_y'] = task.gb_y
+	print_dict['proportions'] = task.proportions
+	print_dict['rbt_id'] = task.rbt_id
+	print_dict['rbt_tank_v'] = task.rbt_tank_v
+	print_dict['rbt_ip'] = task.rbt_ip
+	print print_dict
+	if task.multiply:
+		print_fields_ord(task.ordinary_tasks)
+	return
+
+def print_fields_ord(tasks):
+	print 'Multiply({0}):'.format(len(tasks))
+	for task in tasks:
+		print_dict = {}
+		print_dict['gardenbed_id'] = task.gb_id
+		print_dict['time'] = task.time
+		print_dict['gb_x'] = task.gb_x
+		print_dict['gb_y'] = task.gb_y
+		print_dict['proportions'] = task.proportions
+		print_dict['rbt_id'] = task.rbt_id
+		print_dict['rbt_tank_v'] = task.rbt_tank_v
+		print_dict['rbt_ip'] = task.rbt_ip
+		print '     ', print_dict
+	return
+#-------------------------END_DEBUG_FUNCTIONS____________________#
+
 
 class Base:
 	def __init__(self, login, password):
-		self.task_id = 0
 		self.login = login
 		self.password = password
 		self.tasks = []
+		self.sorted_tasks = {}
+		for i in xrange(0,24):
+			self.sorted_tasks[i] = []
 
 	def has_task(self, task):
 		for t in self.tasks:
@@ -72,6 +111,8 @@ class Base:
 		response = urllib2.urlopen(req)
 		str_json = response.read()
 		self.decoded_json = json.loads(str_json)
+		#print self.decoded_json
+		#self.robot_tank_volume = decoded_json['robot_volume']
 		return self.decoded_json
 
 	def extract_tasks(self):
@@ -92,16 +133,88 @@ class Base:
 			gb_x = decoded_task_dict['gardenbed_posx']
 			gb_y = decoded_task_dict['gardenbed_posy']
 			proportions = decoded_task_dict['proportions']
-			task = Task(gb_id, task_time, gb_x, gb_y, proportions, self.task_id)
+			rbt_id = decoded_task_dict['robot_id']
+			rbt_tank_v = decoded_task_dict['robot_tank_volume']
+			rbt_ip = decoded_task_dict['robot_ip']
+			task = Task(gb_id, task_time, gb_x, gb_y, proportions, rbt_id, rbt_tank_v, rbt_ip, False, [])
+			#print 't:', task.gb_id, task.gb_x, task.gb_y
 			self.tasks.append(task)
-			self.task_id = self.task_id + 1
+		return
 
 	def sort_tasks(self):
-		print 'sort_tasks'
-		for t in self.tasks:
-			print t.id, t.gb_id, t.time, t.proportions
-		pass
+		self.sorted_tasks = {}
+		for i in xrange(0,24):
+			self.sorted_tasks[i] = []
+		# add tasks to shell
+		for task in self.tasks:
+			self.sorted_tasks[int(task.time)].append(task) #ordinary tasks
+		print 'SORTED_TASKS:'
+		for key, values in self.sorted_tasks.iteritems():
+			if (values):
+				print 'Time:{0}'.format(key)
+				for v in values:
+					print_fields(v) #nediola
+		#sort tasks in shell
+		for key_hour in self.sorted_tasks.keys():
+			hour_tasks = self.sorted_tasks[key_hour]
+			self.sorted_tasks[key_hour] = self.group_tasks(hour_tasks) #now can be multiply tasks
 
+		print 'GROUPED_TASKS:'
+		for key, values in self.sorted_tasks.iteritems():
+			if (values):
+				print 'Time:{0}'.format(key)
+				for v in values:
+					print_fields(v) #nediola
+		return
+
+	def group_tasks(self, tasks):
+		grouped_tasks = []
+		for i in xrange(len(tasks)): # ordinary tasks
+			task = tasks[i]
+			tank_ids = task.proportions.keys()
+			found = False
+			for j in xrange(len(grouped_tasks)): #can be multiply tasks
+				g_task = grouped_tasks[j] 
+				if ((g_task.proportions.keys() == tank_ids) 
+				and (g_task.rbt_id == task.rbt_id)
+				and (g_task.rbt_tank_v == task.rbt_tank_v)
+				and (g_task.rbt_ip == task.rbt_ip)):
+					new_task = self.try_group(g_task, task)
+					if new_task:
+						#print 'add new task:'
+						#print_fields(new_task)
+						grouped_tasks[j] = new_task
+					else:
+						#print 'add to back (cant group):'
+						grouped_tasks.append(task)
+					found = True
+					break;
+			if not found:
+				#print 'add to back (not found):'
+				grouped_tasks.append(task)
+		return grouped_tasks
+
+	def try_group(self, gtask1, task2):
+		total_amount = 0
+		new_proportions = {}
+		for key in gtask1.proportions.keys():
+			new_proportion = gtask1.proportions[key] + task2.proportions[key]
+			new_proportions[key] = new_proportion
+			total_amount = total_amount + new_proportion;
+		if total_amount > gtask1.rbt_tank_v:
+			return None
+		else:
+			if gtask1.multiply:
+				ord_tasks = gtask1.ordinary_tasks
+				ord_tasks.append(task2)
+				new_task = Task(0, gtask1.time, 0, 0, new_proportions, gtask1.rbt_id, gtask1.rbt_tank_v, gtask1.rbt_ip, True, ord_tasks)
+			else:
+				ord_tasks = []
+				ord_tasks.append(gtask1)
+				ord_tasks.append(task2)
+				new_task = Task(gtask1.gb_id, gtask1.time, gtask1.gb_x, gtask1.gb_y, new_proportions, gtask1.rbt_id, gtask1.rbt_tank_v, gtask1.rbt_ip, True, ord_tasks)
+			return new_task
+	
 	def do_tasks(self):
 		pass
 

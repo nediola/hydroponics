@@ -43,13 +43,21 @@ class GardenBed(models.Model):
 	def get_gardenbed_posy(self):
 		return self.gardenbed_posy
 
+class Robot(models.Model):
+	class Meta():
+		db_table = 'robot'
+	robot_name = models.CharField(max_length=256)
+	robot_tank_volume = models.IntegerField(default=0)
+	robot_ip = models.CharField(max_length=15)	
+
 class Task(models.Model):
 	class Meta():
 		db_table = 'task'
 	task_gardenbed = models.ForeignKey(GardenBed)
 	task_time = models.IntegerField(default=0)
 	task_json = models.CharField(max_length=1024)
-	task_sent_to_base = models.IntegerField(default=0)	
+	task_sent_to_base = models.IntegerField(default=0)
+	task_robot = models.ForeignKey(Robot, blank=True, null=True)	
 
 class Base(models.Model):
 	class Meta():
@@ -65,10 +73,3 @@ class Tank(models.Model):
 	tank_current_volume = models.IntegerField(default=0)
 	tank_max_volume = models.IntegerField(default=0)
 	tank_ingredient = models.OneToOneField(Ingredient, blank=True, null=True)
-
-class Robot(models.Model):
-	class Meta():
-		db_table = 'robot'
-	robot_name = models.CharField(max_length=256)
-	robot_tank_volume = models.IntegerField(default=0)
-	robot_ip = models.CharField(max_length=15)	

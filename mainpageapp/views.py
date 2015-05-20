@@ -179,6 +179,7 @@ def create_tasks(gardenbed):
 			all_int_time.append(int(st))
 		except ValueError:
 			continue
+	robot = Robot.objects.get(id=1)
 	for t in all_int_time:
 		task_cmd = {}
 		task_cmd['gardenbed_id'] = gardenbed.id
@@ -187,9 +188,12 @@ def create_tasks(gardenbed):
 		task_cmd['gardenbed_posy'] = gardenbed.gardenbed_posy
 		task_cmd['proportions'] = proportions
 		task_cmd['time'] = t
+		task_cmd['robot_id'] = robot.id
+		task_cmd['robot_tank_volume'] = robot.robot_tank_volume
+		task_cmd['robot_ip'] = robot.robot_ip
 		task_cmd_json = json.dumps(task_cmd)
 		print(task_cmd_json)
-		task = Task.objects.create(task_gardenbed_id=gardenbed.id, task_time=t, task_json=task_cmd_json)
+		task = Task.objects.create(task_gardenbed_id=gardenbed.id, task_time=t, task_json=task_cmd_json, task_robot=robot)
 	return 'OK'
 
 def set_plants(request):
