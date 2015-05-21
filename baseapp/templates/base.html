@@ -1,7 +1,79 @@
 {% extends 'navbar.html' %}
-
+{% load staticfiles %}
 {% block subpage %}
-
-<p>BASE</p>
-
+<div class="container">
+		<div class="row">
+			<div class="col-md-6"></div>
+			<div class="col-md-6">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+    					<h3 class="panel-title">Микроклимат помещения</h3>
+  					</div>
+  					<div class="panel-body">
+						<div>{{sensor_time}}</div>
+						<div>Температура: {{temperature}} C</div>
+						<div>Влажность: {{humidity}} %</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% for t in tanks %}
+		{% if forloop.counter|divisibleby:2 %}
+		{% else %}
+		<div class="row">
+		{% endif %}
+			<div class="col-md-6">
+			<div class="panel panel-default">
+	  			<div class="panel-body">
+					<form action="/base/set_tanks/" method="POST" id="tank_form_{{t.id}}" onSubmit='return checkform()'>
+						<input type="hidden" name="tank_id" value={{t.id}}>
+	        	    	<div>
+	        	    		<h4>Резервуар № {{t.tank_id}}</h4>
+	        	    	</div>
+	        	    	<div class="row">
+	      					<div class="col-md-3"><label>Ингредиент:</label></div>
+	      					<div class="col-md-7">
+	      						<select class="form-control select-tank-ingredient" name="tank_ingredient">
+	      							<option value="0">Пусто</option>
+	      							{% for i in ingredients %}			
+	        								<option value="{{i.id}}" 
+	        								{% ifequal t.tank_ingredient_id i.id %}
+	        								selected="selected"
+	        								{% endifequal %}
+	        								>{{i.ingredient_name }}</option>
+	      							{% endfor %}
+	      						</select>
+	      					</div>
+	    				</div>
+	    				<hr>
+	    				<div class="row">
+	    					<div class="col-md-3"><label>Текущее количество:</label></div>
+	    					<div class="col-md-1">
+	    						<input name="tank_current_volume" type="number" value={{t.tank_current_volume}}>
+	    					</div>
+	    				</div>
+	    				<div class="row">
+	    					<div class="col-md-3"><label>Вместимость:</label></div>
+	    					<div class="col-md-1">
+	    						<input name="tank_max_volume" type="number" value={{t.tank_max_volume}}>
+	    					</div>
+	    				</div>
+	    	    		<hr>
+	    	    		<div class="row">
+	    	    			<div class="col-md-12">
+	    	    				<div class="btn-group pull-right" role="group">
+	    	    					<input type="submit" class="btn btn-success save-tank-button" value="Сохранить"/>
+	     						</div>
+	     					</div>
+	     				</div>
+	        		</form>
+	        	</div>
+	        </div>
+	     </div>
+	     {% if forloop.counter|divisibleby:2 %}
+	     </div>
+	     {% endif %}
+		{% endfor%}
+	</div>
+	<script src="{% static 'js/base.js' %}" type="text/javascript"></script>
 {% endblock subpage %}

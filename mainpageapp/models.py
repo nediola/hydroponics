@@ -64,6 +64,9 @@ class Base(models.Model):
 		db_table = 'base'
 	base_name = models.CharField(max_length=256)
 	base_ip = models.CharField(max_length=15)
+	base_temperature = models.IntegerField(blank=True, null=True)
+	base_humidity = models.IntegerField(blank=True, null=True)
+	base_sensor_time = models.CharField(max_length=100, blank=True, null=True)
 
 class Tank(models.Model):
 	class Meta():
